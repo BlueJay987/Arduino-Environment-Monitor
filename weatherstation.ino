@@ -3,20 +3,25 @@
 #include <dht_nonblocking.h>
 #include <SPI.h>
 #include <Adafruit_BMP280.h>
+
+// Calculate Runtime
 String runtime = String(millis()/1000);
 
+// Set Up BMP280
 #define BMP280_ADDRESS 0x76
-Adafruit_BMP280 bmp;                              // I2C
+Adafruit_BMP280 bmp;                              
 
-
+// Set Up LCD
 const int LCD_WIDTH = 20;
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
+// Set Up DHT11
 #define DHT_SENSOR_TYPE DHT_TYPE_11
 static const int DHT_SENSOR_PIN = 2;
 DHT_nonblocking dht_sensor(DHT_SENSOR_PIN, DHT_SENSOR_TYPE);
 
-LiquidCrystal_I2C lcd(0x27, 20, 4);
 
+// Check for DHT11 Output
 static bool measure_environment(float *temperature, float *humidity) {
   static unsigned long measurement_timestamp = millis();
 
@@ -42,6 +47,7 @@ void setup() {
     while (1);
   }
 
+  // Don't Know What This Is But It's Required
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
                 Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                 Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
@@ -56,14 +62,14 @@ void loop() {
 
   if (measure_environment(&temperature, &humidity) == true) {
     lcd.setCursor(LCD_WIDTH / 2 - 3, 0);
-    lcd.print((temperature * 9 / 5) + 32, 1);
+    lcd.print((temperature * 9 / 5) + 32, 1);  // Converts C to F
     lcd.print("F");
     lcd.setCursor(LCD_WIDTH / 2 - 2, 1);
     lcd.print(humidity, 0);
     lcd.print("%");
   }
   lcd.setCursor(LCD_WIDTH/2 - 5, 2);
-  lcd.print(bmp.readPressure()/100, 1);
+  lcd.print(bmp.readPressure()/100, 1); // Converts Pascals to Millibars
   lcd.print(" mb");
   lcd.setCursor(LCD_WIDTH/2 - runtime.length()*2, 3);
   lcd.print(millis()/1000);
